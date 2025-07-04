@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Icon(Icons.pets, color: Colors.white, size: 35),
         title: const Text('Coração Animal'),
         backgroundColor: Colors.green[400],
       ),
