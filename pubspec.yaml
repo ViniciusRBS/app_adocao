@@ -14,9 +14,24 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.6
+
+flutter_icons:
+  image_path: "assets/icons/dog.png"
+  android: true
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/icons/
+
+flutter_native_splash:
+  color: "#FFA726" # ou `background_image: "assets/splash/bg.png"`
+  image: "assets/icons/dog.png"
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: center
     

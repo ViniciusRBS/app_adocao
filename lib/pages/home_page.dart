@@ -3,7 +3,7 @@ import 'favorites_page.dart';
 import 'perfil_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _MockHomeContent extends StatelessWidget {
-  const _MockHomeContent({Key? key}) : super(key: key);
+  const _MockHomeContent({super.key});
 
   @override
   Widget build(BuildContext context) {
