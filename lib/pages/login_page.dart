@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -9,54 +10,50 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
 
-  bool isLogin = true; // alterna entre login e cadastro
+  bool isLogin = true;
+  bool _isLoading = false;
   String message = '';
 
-  // Dados mockados para simulação
-  final Map<String, String> mockUsers = {
-    'usuario': '123456',
-  };
+  void _submit() async {
+    String nome = _nomeController.text.trim();
+    String email = _emailController.text.trim();
+    String senha = _senhaController.text;
 
-  void _loginOrRegister() {
-    String username = _usernameController.text.trim();
-    String password = _passwordController.text;
-
-    if (username.isEmpty || password.isEmpty) {
+    if (email.isEmpty || senha.isEmpty || (!isLogin && nome.isEmpty)) {
       setState(() {
-        message = 'Preencha todos os campos';
+        message = 'Preencha todos os campos.';
       });
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+      message = '';
+    });
+
+    String? resultado;
     if (isLogin) {
-      // LOGIN
-      if (mockUsers.containsKey(username) && mockUsers[username] == password) {
-        setState(() {
-          message = 'Login bem-sucedido!';
-          AuthController.login(username: username);
-          Navigator.pop(context); // Fecha a tela de login
-        });
-      } else {
-        setState(() {
-          message = 'Usuário ou senha inválidos';
-        });
-      }
+      resultado = await AuthController.login(email, senha);
     } else {
-      // REGISTRO
-      if (mockUsers.containsKey(username)) {
-        setState(() {
-          message = 'Usuário já existe';
-        });
-      } else {
-        setState(() {
-          mockUsers[username] = password;
-          message = 'Cadastro realizado com sucesso!';
-          isLogin = true;
-        });
-      }
+      resultado = await AuthController.register(nome, email, senha);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (resultado == null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomePage()),
+      );
+    } else {
+      setState(() {
+        message = resultado!;
+      });
     }
   }
 
@@ -64,8 +61,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLogin = !isLogin;
       message = '';
-      _usernameController.clear();
-      _passwordController.clear();
     });
   }
 
@@ -73,30 +68,34 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          isLogin 
-            ? 'Login' 
-            : 'Cadastro',
-          style: const TextStyle(color: Colors.white, fontSize: 24),
-        ),
+        title: Text(isLogin ? 'Login' : 'Cadastro'),
+        backgroundColor: Colors.green,
         centerTitle: true,
-        backgroundColor: Colors.green[400],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (!isLogin)
+              TextField(
+                controller: _nomeController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            if (!isLogin) const SizedBox(height: 16),
             TextField(
-              controller: _usernameController,
+              controller: _emailController,
               decoration: const InputDecoration(
-                labelText: 'Usuário',
+                labelText: 'E-mail',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: _passwordController,
+              controller: _senhaController,
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Senha',
@@ -104,39 +103,27 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[400],
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              onPressed: _loginOrRegister,
-              child: Text(
-                isLogin 
-                  ? 'Entrar' 
-                  : 'Cadastrar',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            const SizedBox(height: 8),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    ),
+                    child: Text(isLogin ? 'Entrar' : 'Cadastrar'),
+                  ),
             TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.green[400],
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              onPressed: _toggleMode,
-              child: Text(
-                isLogin
-                    ? 'Não tem conta? Cadastre-se'
-                    : 'Já tem conta? Faça login',
-                style: const TextStyle(fontSize: 16, color: Colors.green),
-              ),
+              onPressed: _isLoading ? null : _toggleMode,
+              child: Text(isLogin
+                  ? 'Não tem conta? Cadastre-se'
+                  : 'Já tem conta? Fazer login'),
             ),
             const SizedBox(height: 16),
             Text(
               message,
               style: TextStyle(
                 color: message.contains('sucesso') ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
               ),
             ),
           ],

@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "162643822335",
+    "firebase_url": "https://app-satisfacao-61785-default-rtdb.firebaseio.com",
+    "project_id": "app-satisfacao-61785",
+    "storage_bucket": "app-satisfacao-61785.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162643822335:android:2f40b1d077eec974edaeca",
+        "android_client_info": {
+          "package_name": "com.example.app_satisfacao"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4hyndpM2udbQhV6DqtmxsmvVYhs5L6EI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162643822335:android:4378c81a841d7742edaeca",
+        "android_client_info": {
+          "package_name": "com.example.app_teste1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4hyndpM2udbQhV6DqtmxsmvVYhs5L6EI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
