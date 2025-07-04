@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'favorites_page.dart';
 import 'perfil_page.dart';
+import 'adocao_page.dart'; // nova importação
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   final List<Widget> _pages = const [
-    _MockHomeContent(),
+    AdocaoPage(),
     MockFavoritesPage(),
     PerfilPage(),
   ];
