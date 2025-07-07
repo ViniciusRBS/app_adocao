@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'favorites_page.dart';
+import 'favoritos_page.dart';
 import 'perfil_page.dart';
-import 'adocao_page.dart'; // nova importação
+import 'adocao_page.dart';
+import 'cadastro_animal_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = const [
     AdocaoPage(),
-    MockFavoritesPage(),
+    FavoritosPage(),
     PerfilPage(),
   ];
 
@@ -54,35 +55,20 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      floatingActionButton: _selectedIndex == 0
+    ? FloatingActionButton(
+        backgroundColor: Colors.green[400],
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CadastroPetPage()),
+          );
+        },
+      )
+    : null,
+
     );
   }
 }
 
-class _MockHomeContent extends StatelessWidget {
-  const _MockHomeContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final animais = [
-      {'nome': 'Luna', 'descricao': 'Cachorra brincalhona'},
-      {'nome': 'Milo', 'descricao': 'Gato tranquilo'},
-      {'nome': 'Bella', 'descricao': 'Cachorra dócil'},
-    ];
-
-    return ListView.builder(
-      itemCount: animais.length,
-      padding: const EdgeInsets.all(16),
-      itemBuilder: (context, index) {
-        final animal = animais[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: ListTile(
-            leading: const Icon(Icons.pets),
-            title: Text(animal['nome']!),
-            subtitle: Text(animal['descricao']!),
-          ),
-        );
-      },
-    );
-  }
-}
