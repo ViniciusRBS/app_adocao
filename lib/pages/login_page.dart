@@ -45,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = false;
     });
+    FocusScope.of(context).unfocus();
 
     if (resultado == null) {
       Navigator.of(context).pushReplacement(
