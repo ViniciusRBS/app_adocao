@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'detalhes_pet_page.dart';
+import 'package:app_teste1/widgets/botao_favorito.dart';
 
 class AdocaoPage extends StatelessWidget {
   const AdocaoPage({super.key});
@@ -8,7 +10,7 @@ class AdocaoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('animais').snapshots(),
+      stream: FirebaseFirestore.instance.collection('pets').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -25,10 +27,11 @@ class AdocaoPage extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           itemBuilder: (context, index) {
             final animal = animais[index];
-            final nome = animal['nome'];
-            final descricao = animal['descricao'];
-            final foto = animal['foto'];
-            final tipo = animal['tipo'];
+            final nome = animal['nome'] ?? 'Sem nome';
+            final descricao = animal['descricao'] ?? 'Sem descrição';
+            final foto = animal['foto'] ?? '';
+            final tipo = animal['tipo'] ?? 'Desconhecido';
+
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 10),
@@ -40,10 +43,11 @@ class AdocaoPage extends StatelessWidget {
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Image.network(
-                      foto,
-                      width: double.infinity,
-                      height: 180,
-                      fit: BoxFit.cover,
+                    foto.isNotEmpty ? foto : 'https://via.placeholder.com/300x180?text=Sem+Imagem',
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
                     ),
                   ),
                   Padding(
@@ -78,6 +82,12 @@ class AdocaoPage extends StatelessWidget {
                           children: [
                             ElevatedButton.icon(
                               onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => DetalhesPetPage(petId: animal.id),
+                                  ),
+                                );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('Mais detalhes de $nome')),
                                 );
@@ -89,10 +99,7 @@ class AdocaoPage extends StatelessWidget {
                                 foregroundColor: Colors.white,
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.favorite_border),
-                              onPressed: () => _toggleFavorito(animal.id),
-                            )
+                            BotaoFavorito(petId: animal.id),
                           ],
                         )
                       ],
@@ -111,7 +118,7 @@ class AdocaoPage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final docRef = FirebaseFirestore.instance.collection('animais').doc(animalId);
+    final docRef = FirebaseFirestore.instance.collection('pets').doc(animalId);
     final doc = await docRef.get();
 
     List favoritos = doc['favoritadoPor'] ?? [];
