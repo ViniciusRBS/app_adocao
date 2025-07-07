@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import 'login_page.dart';
+import 'meus_pets_page.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
@@ -82,7 +83,12 @@ class PerfilPage extends StatelessWidget {
                 leading: const Icon(Icons.pets, color: Color(0xFF388E3C)),
                 title: const Text('Meus Pets para Adoção'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MeusPetsPage()),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.favorite, color: Color(0xFF388E3C)),
