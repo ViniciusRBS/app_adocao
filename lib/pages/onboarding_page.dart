@@ -143,7 +143,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.favorite, size: 48, color: Color(0xFFA5D6A7)),
+                const Icon(Icons.favorite, size: 48, color: Color(0xFFFFA726)),
                 const SizedBox(height: 12),
                 const Text(
                   'Comece Agora!',
@@ -163,7 +163,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Color(0xFFFFA726),
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   ),
                   child: const Text(
