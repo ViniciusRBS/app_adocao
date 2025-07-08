@@ -4,198 +4,219 @@ import 'package:flutter/material.dart';
 import 'detalhes_pet_page.dart';
 import 'package:app_teste1/widgets/botao_favorito.dart';
 
-class AdocaoPage extends StatelessWidget {
+class AdocaoPage extends StatefulWidget {
   const AdocaoPage({super.key});
 
   @override
+  State<AdocaoPage> createState() => _AdocaoPageState();
+}
+
+class _AdocaoPageState extends State<AdocaoPage> {
+  String _searchQuery = '';
+  String _filtroTipo = '';
+  String _filtroTamanho = '';
+  String _filtroSexo = '';
+
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('pets').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('Nenhum animal disponível para adoção.'));
-        }
-
-        final animais = snapshot.data!.docs;
-
-        return ListView.builder(
-          itemCount: animais.length,
-          padding: const EdgeInsets.all(16),
-          itemBuilder: (context, index) {
-            final animal = animais[index];
-            final nome = animal['nome'] ?? 'Sem nome';
-            final descricao = animal['descricao'] ?? 'Sem descrição';
-            final foto = animal['foto'] ?? '';
-            final tipo = animal['tipo'] ?? 'Desconhecido';
-
-
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Image.network(
-                    foto.isNotEmpty ? foto : 'https://via.placeholder.com/300x180?text=Sem+Imagem',
-                    width: double.infinity,
-                    height: 180,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Chip(
-                              label: Text(tipo),
-                              backgroundColor: Colors.green.shade100,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              nome,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          descricao,
-                          style: const TextStyle(fontSize: 16, color: Colors.black54),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => DetalhesPetPage(petId: animal.id),
-                                  ),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Mais detalhes de $nome')),
-                                );
-                              },
-                              icon: const Icon(Icons.info_outline),
-                              label: const Text('Ver detalhes'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFFFFA726),
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.contact_mail, color: Colors.green),
-                                  tooltip: 'Contato',
-                                  onPressed: () => _mostrarContato(context, animais[index]['userId']),
-                                ),
-                                BotaoFavorito(petId: animal.id),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _toggleFavorito(String animalId) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final docRef = FirebaseFirestore.instance.collection('pets').doc(animalId);
-    final doc = await docRef.get();
-
-    List favoritos = doc['favoritadoPor'] ?? [];
-
-    if (favoritos.contains(user.uid)) {
-      favoritos.remove(user.uid);
-    } else {
-      favoritos.add(user.uid);
-    }
-
-    await docRef.update({'favoritadoPor': favoritos});
-  }
-
-  void _mostrarContato(BuildContext context, String donoId) async {
-  try {
-    final doc = await FirebaseFirestore.instance.collection('usuarios').doc(donoId).get();
-
-    if (!doc.exists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Informações de contato não encontradas.')),
-      );
-      return;
-    }
-
-    final nome = doc['nome'] ?? 'Nome não disponível';
-    final email = doc['email'] ?? 'Email não disponível';
-    final telefone = doc['telefone'] ?? 'Telefone não disponível';
-
-    if (!context.mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Contato de $nome'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.email, color: Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(child: Text(email)),
-              ],
+    return Column(
+      children: [
+        // Barra de pesquisa
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Buscar por nome',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.phone, color: Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(child: Text(telefone)),
-              ],
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value.toLowerCase();
+              });
+            },
+          ),
+        ),
+
+        // Filtros
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          alignment: WrapAlignment.start,
+          children: [
+            _buildChip('Cachorro', _filtroTipo, (val) {
+              setState(() => _filtroTipo = val);
+            }),
+            _buildChip('Gato', _filtroTipo, (val) {
+              setState(() => _filtroTipo = val);
+            }),
+            _buildChip('Pequeno', _filtroTamanho, (val) {
+              setState(() => _filtroTamanho = val);
+            }),
+            _buildChip('Médio', _filtroTamanho, (val) {
+              setState(() => _filtroTamanho = val);
+            }),
+            _buildChip('Grande', _filtroTamanho, (val) {
+              setState(() => _filtroTamanho = val);
+            }),
+            _buildChip('Macho', _filtroSexo, (val) {
+              setState(() => _filtroSexo = val);
+            }),
+            _buildChip('Fêmea', _filtroSexo, (val) {
+              setState(() => _filtroSexo = val);
+            }),
+            ActionChip(
+              label: const Text('Limpar filtros'),
+              onPressed: () {
+                setState(() {
+                  _filtroTipo = '';
+                  _filtroTamanho = '';
+                  _filtroSexo = '';
+                  _searchQuery = '';
+                });
+              },
+              backgroundColor: Colors.grey.shade200,
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            child: const Text('Fechar'),
-            onPressed: () => Navigator.pop(context),
+
+        const SizedBox(height: 8),
+
+        // Lista de pets
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('pets').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('Nenhum animal disponível.'));
+              }
+
+              final animais = snapshot.data!.docs.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final nome = (data['nome'] ?? '').toString().toLowerCase();
+                final tipo = (data['tipo'] ?? '').toString();
+                final tamanho = (data['tamanho'] ?? '').toString();
+                final sexo = (data['sexo'] ?? '').toString();
+
+                final correspondeBusca = _searchQuery.isEmpty || nome.contains(_searchQuery);
+                final correspondeTipo = _filtroTipo.isEmpty || tipo == _filtroTipo;
+                final correspondeTamanho = _filtroTamanho.isEmpty || tamanho == _filtroTamanho;
+                final correspondeSexo = _filtroSexo.isEmpty || sexo == _filtroSexo;
+
+                return correspondeBusca && correspondeTipo && correspondeTamanho && correspondeSexo;
+              }).toList();
+
+              if (animais.isEmpty) {
+                return const Center(child: Text('Nenhum animal encontrado com esses critérios.'));
+              }
+
+              return GridView.builder(
+                padding: const EdgeInsets.all(12),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                ),
+                itemCount: animais.length,
+                itemBuilder: (context, index) {
+                  final animal = animais[index];
+                  final data = animal.data() as Map<String, dynamic>;
+                  final nome = data['nome'] ?? 'Sem nome';
+                  final descricao = data['descricao'] ?? '';
+                  final foto = data['foto'] ?? '';
+                  final tipo = data['tipo'] ?? '';
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DetalhesPetPage(petId: animal.id),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                            child: Image.network(
+                              foto.isNotEmpty
+                                  ? foto
+                                  : 'https://via.placeholder.com/300x200?text=Sem+Imagem',
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.broken_image),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Chip(
+                                  label: Text(tipo),
+                                  backgroundColor: Colors.green.shade100,
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  labelStyle: const TextStyle(fontSize: 12),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  nome,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  descricao,
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.black54),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: BotaoFavorito(petId: animal.id, detalhesPage: false),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-        ],
-      ),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Erro ao buscar contato: $e')),
+        ),
+      ],
     );
   }
-}
 
+  Widget _buildChip(String label, String selected, void Function(String) onSelected) {
+    final bool isSelected = selected == label;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onSelected(isSelected ? '' : label),
+      selectedColor: const Color(0xFFFFA726),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Colors.black,
+      ),
+    );
+  }
 }
