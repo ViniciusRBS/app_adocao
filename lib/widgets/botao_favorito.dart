@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class BotaoFavorito extends StatefulWidget {
   final String petId;
+  final bool detalhesPage;
 
-  const BotaoFavorito({super.key, required this.petId});
+  const BotaoFavorito({super.key, required this.petId, this.detalhesPage=false});
 
   @override
   State<BotaoFavorito> createState() => _BotaoFavoritoState();
@@ -61,7 +62,7 @@ Future<void> _verificarFavorito() async {
     return IconButton(
       icon: Icon(
         _favoritado ? Icons.favorite : Icons.favorite_border,
-        color: _favoritado ? Colors.red : Colors.white,
+        color: _favoritado ? Colors.red : (widget.detalhesPage ?Colors.white:Colors.black),
       ),
       onPressed: _alternarFavorito,
     );
