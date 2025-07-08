@@ -13,6 +13,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
+  final TextEditingController _telefoneController = TextEditingController(); // novo
 
   bool isLogin = true;
   bool _isLoading = false;
@@ -22,8 +23,9 @@ class _LoginPageState extends State<LoginPage> {
     String nome = _nomeController.text.trim();
     String email = _emailController.text.trim();
     String senha = _senhaController.text;
+    String telefone = _telefoneController.text.trim(); // novo
 
-    if (email.isEmpty || senha.isEmpty || (!isLogin && nome.isEmpty)) {
+    if (email.isEmpty || senha.isEmpty || (!isLogin && (nome.isEmpty || telefone.isEmpty))) {
       setState(() {
         message = 'Preencha todos os campos.';
       });
@@ -39,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     if (isLogin) {
       resultado = await AuthController.login(email, senha);
     } else {
-      resultado = await AuthController.register(nome, email, senha);
+      resultado = await AuthController.register(nome, email, senha, telefone); // novo parametro
     }
 
     setState(() {
@@ -70,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(isLogin ? 'Login' : 'Cadastro', style: const TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFFFFA726),
+        backgroundColor: const Color(0xFFFFA726),
         centerTitle: true,
       ),
       body: Padding(
@@ -87,6 +89,18 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             if (!isLogin) const SizedBox(height: 16),
+
+            if (!isLogin)
+              TextField(
+                controller: _telefoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Telefone',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            if (!isLogin) const SizedBox(height: 16),
+
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -109,17 +123,17 @@ class _LoginPageState extends State<LoginPage> {
                 : ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFFFA726),
+                      backgroundColor: const Color(0xFFFFA726),
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                     ),
                     child: Text(isLogin ? 'Entrar' : 'Cadastrar', style: const TextStyle(color: Colors.white)),
                   ),
             TextButton(
               onPressed: _isLoading ? null : _toggleMode,
-              child: Text(isLogin
-                  ? 'Não tem conta? Cadastre-se'
-                  : 'Já tem conta? Fazer login',
-                  style: const TextStyle(color: Colors.black)),
+              child: Text(
+                isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Fazer login',
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
             const SizedBox(height: 16),
             Text(

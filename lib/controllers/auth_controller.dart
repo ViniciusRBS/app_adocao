@@ -20,7 +20,8 @@ class AuthController {
     }
   }
 
-  static Future<String?> register(String nome, String email, String senha) async {
+  // Método register atualizado para receber telefone
+  static Future<String?> register(String nome, String email, String senha, String telefone) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: senha);
@@ -30,10 +31,11 @@ class AuthController {
       await FirebaseFirestore.instance.collection('usuarios').doc(uid).set({
         'nome': nome,
         'email': email,
+        'telefone': telefone,               // novo campo telefone
         'criadoEm': FieldValue.serverTimestamp(),
       });
 
-      // Não fazer login automaticamente após o cadastro
+      // Não faz login automático após o cadastro
       return null;
     } on FirebaseAuthException catch (e) {
       print('Erro de autenticação: ${e.message}');
