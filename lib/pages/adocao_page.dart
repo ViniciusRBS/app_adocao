@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'detalhes_pet_page.dart';
-import 'package:app_teste1/widgets/botao_favorito.dart';
 
 class AdocaoPage extends StatefulWidget {
   const AdocaoPage({super.key});
