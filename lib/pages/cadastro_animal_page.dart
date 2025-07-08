@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,18 +17,34 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
   final TextEditingController _descricaoController = TextEditingController();
 
   String? _tipoSelecionado;
+  String? _tamanhoSelecionado;
+  String? _sexoSelecionado;
   File? _imagemSelecionada;
 
   bool _isLoading = false;
 
-  final List<String> _tiposAnimais = [
-    'Cachorro',
-    'Gato',
-    'Passarinho',
-    'Coelho',
-    'Outro',
-  ];
+  final List<String> _tamanhos = ['Pequeno', 'Médio', 'Grande'];
+  final List<String> _sexos = ['Macho', 'Fêmea'];
+  List<String> _tiposAnimais = [];
+  
 
+
+
+
+  Future<void> _carregarTiposDoFirebase() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('tipos').get();
+      final tipos = snapshot.docs.map((doc) => doc['nome'].toString()).toList();
+      setState(() {
+        _tiposAnimais = tipos;
+      });
+    } catch (e) {
+      print('Erro ao carregar tipos: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar tipos de animais: $e')),
+      );
+    }
+  }
   Future<void> _selecionarImagem() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -44,9 +59,9 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
   Future<void> _salvarPet() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_tipoSelecionado == null) {
+    if (_tipoSelecionado == null || _tamanhoSelecionado == null || _sexoSelecionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione o tipo de animal.')),
+        const SnackBar(content: Text('Preencha todos os campos obrigatórios.')),
       );
       return;
     }
@@ -63,7 +78,9 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
         'nome': _nomeController.text.trim(),
         'descricao': _descricaoController.text.trim(),
         'tipo': _tipoSelecionado,
-        'foto': null,
+        'tamanho': _tamanhoSelecionado,
+        'sexo': _sexoSelecionado,
+        'foto': null, // Imagem ainda não salva em armazenamento
         'userId': user.uid,
         'criadoEm': FieldValue.serverTimestamp(),
         'favoritadoPor': [],
@@ -91,13 +108,18 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
     _descricaoController.dispose();
     super.dispose();
   }
+  @override
+  void initState() {
+    super.initState();
+    _carregarTiposDoFirebase(); // <-- Chamada necessária para carregar os tipos do Firestore
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cadastrar Novo Pet',style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFFFFA726), // Cor personalizada
+        title: const Text('Cadastrar Novo Pet', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFFFFA726),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -105,19 +127,20 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
           key: _formKey,
           child: Column(
             children: [
-              // Campo Nome
+              // Nome
               TextFormField(
                 controller: _nomeController,
                 decoration: const InputDecoration(
                   labelText: 'Nome',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe o nome' : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Informe o nome'
+                    : null,
               ),
               const SizedBox(height: 16),
 
-              // Campo Descrição
+              // Descrição
               TextFormField(
                 controller: _descricaoController,
                 decoration: const InputDecoration(
@@ -125,12 +148,13 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe a descrição' : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Informe a descrição'
+                    : null,
               ),
               const SizedBox(height: 16),
 
-              // Dropdown Tipo
+              // Tipo
               DropdownButtonFormField<String>(
                 value: _tipoSelecionado,
                 decoration: const InputDecoration(
@@ -138,7 +162,10 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
                   border: OutlineInputBorder(),
                 ),
                 items: _tiposAnimais
-                    .map((tipo) => DropdownMenuItem(value: tipo, child: Text(tipo)))
+                    .map((tipo) => DropdownMenuItem(
+                          value: tipo,
+                          child: Text(tipo),
+                        ))
                     .toList(),
                 onChanged: (val) {
                   setState(() {
@@ -148,9 +175,41 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Selecione o tipo do animal' : null,
               ),
+              const SizedBox(height: 16),
+
+              // Tamanho
+              DropdownButtonFormField<String>(
+                value: _tamanhoSelecionado,
+                decoration: const InputDecoration(
+                  labelText: 'Tamanho',
+                  border: OutlineInputBorder(),
+                ),
+                items: _tamanhos
+                    .map((tam) => DropdownMenuItem(value: tam, child: Text(tam)))
+                    .toList(),
+                onChanged: (val) => setState(() => _tamanhoSelecionado = val),
+                validator: (value) =>
+                    value == null ? 'Selecione o tamanho do pet' : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Sexo
+              DropdownButtonFormField<String>(
+                value: _sexoSelecionado,
+                decoration: const InputDecoration(
+                  labelText: 'Sexo',
+                  border: OutlineInputBorder(),
+                ),
+                items: _sexos
+                    .map((sexo) => DropdownMenuItem(value: sexo, child: Text(sexo)))
+                    .toList(),
+                onChanged: (val) => setState(() => _sexoSelecionado = val),
+                validator: (value) =>
+                    value == null ? 'Selecione o sexo do pet' : null,
+              ),
               const SizedBox(height: 24),
 
-              // Seletor de Imagem
+              // Imagem
               GestureDetector(
                 onTap: _selecionarImagem,
                 child: Container(
@@ -168,23 +227,23 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
               ),
               const SizedBox(height: 24),
 
-              // Botão Salvar
+              // Botão
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _salvarPet,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFFFA726), // Cor personalizada
+                    backgroundColor: const Color(0xFFFFA726),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Salvar Pet',
-                          style: TextStyle(fontSize: 18,color: Colors.white),
+                          style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
                 ),
-              )
+              ),
             ],
           ),
         ),
