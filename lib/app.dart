@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'pages/onboarding_page.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp1 extends StatelessWidget {
+  const MyApp1({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
       title: 'Coração Animal',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.yellow, // Define a cor primária como laranja (0xFFFFA726),
       ),
       home: const OnboardingPage(),
     );
