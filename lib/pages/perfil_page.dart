@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import 'login_page.dart';
 import 'meus_pets_page.dart';
+import 'configuracoes_page.dart';
+import 'ajuda_page.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
@@ -55,21 +57,20 @@ class PerfilPage extends StatelessWidget {
           );
         }
 
-        // Conteúdo de perfil do usuário logado
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(height: 32),
-              const CircleAvatar(
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          children: [
+            const Center(
+              child: CircleAvatar(
                 radius: 48,
                 backgroundColor: Color(0xFFFFA726),
                 child: Icon(Icons.account_circle,
                     size: 80, color: Colors.white),
               ),
-              const SizedBox(height: 16),
-              Text(
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
                 AuthController.userName ?? 'Usuário',
                 style: const TextStyle(
                   fontSize: 24,
@@ -77,33 +78,101 @@ class PerfilPage extends StatelessWidget {
                   color: Color(0xFFFFA726),
                 ),
               ),
-              const SizedBox(height: 8),
-              const SizedBox(height: 32),
-              ListTile(
-                leading: const Icon(Icons.pets, color: Color(0xFFFFA726)),
-                title: const Text('Meus Pets para Adoção'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MeusPetsPage()),
-                  );
-                },
+            ),
+            const SizedBox(height: 32),
+
+            const Text(
+              'Conta',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black54,
               ),
-              ListTile(
-                leading: const Icon(Icons.favorite, color: Color(0xFFFFA726)),
-                title: const Text('Favoritos'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {},
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.pets, color: Color(0xFFFFA726)),
+              title: const Text('Meus Pets para Adoção'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MeusPetsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite, color: Color(0xFFFFA726)),
+              title: const Text('Favoritos'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                // Implementar favoritos
+            },
+            ),
+
+            const SizedBox(height: 24),
+            const Text(
+              'Atividades',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black54,
               ),
-              ListTile(
-                leading: const Icon(Icons.settings, color: Color(0xFFFFA726)),
-                title: const Text('Configurações'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {},
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.history, color: Color(0xFFFFA726)),
+              title: const Text('Histórico de Adoções'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                // Implementar histórico
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.share, color: Color(0xFFFFA726)),
+              title: const Text('Compartilhar o app'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                // Implementar compartilhamento
+              },
+            ),
+
+            const SizedBox(height: 24),
+            const Text(
+              'Preferências',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black54,
               ),
-              const SizedBox(height: 24),
-              TextButton.icon(
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings, color: Color(0xFFFFA726)),
+              title: const Text('Configurações'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ConfiguracoesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline, color: Color(0xFFFFA726)),
+              title: const Text('Ajuda e Suporte'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AjudaPage()),
+                );
+              },
+            ),
+
+            const SizedBox(height: 24),
+            Center(
+              child: TextButton.icon(
                 onPressed: () {
                   AuthController.logout();
                   Navigator.of(context).pushReplacement(
@@ -113,8 +182,8 @@ class PerfilPage extends StatelessWidget {
                 icon: const Icon(Icons.logout, color: Colors.red),
                 label: const Text('Sair', style: TextStyle(color: Colors.red)),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
