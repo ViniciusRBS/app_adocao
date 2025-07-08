@@ -38,7 +38,12 @@ class FavoritosPage extends StatelessWidget {
             final nome = animal['nome'] ?? 'Sem nome';
             final descricao = animal['descricao'] ?? '';
             final tipo = animal['tipo'] ?? 'Desconhecido';
-            final foto = animal['foto'] ?? '';
+
+            // Pega a lista de fotos do pet
+            final List<dynamic> fotos = animal['fotos'] ?? [];
+
+            // URL da primeira foto ou string vazia
+            final String? primeiraFoto = fotos.isNotEmpty ? fotos[0] as String : null;
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 10),
@@ -49,8 +54,15 @@ class FavoritosPage extends StatelessWidget {
               child: ListTile(
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: foto.isNotEmpty
-                      ? Image.network(foto, width: 50, height: 50, fit: BoxFit.cover)
+                  child: primeiraFoto != null && primeiraFoto.isNotEmpty
+                      ? Image.network(
+                          primeiraFoto,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
+                        )
                       : const Icon(Icons.image_not_supported, size: 50),
                 ),
                 title: Text(nome),

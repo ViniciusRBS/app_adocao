@@ -128,8 +128,9 @@ class _AdocaoPageState extends State<AdocaoPage> {
                   final data = animal.data() as Map<String, dynamic>;
                   final nome = data['nome'] ?? 'Sem nome';
                   final descricao = data['descricao'] ?? '';
-                  final foto = data['foto'] ?? '';
                   final tipo = data['tipo'] ?? '';
+                  final List<dynamic> fotos = data['fotos'] ?? [];
+                  final String primeiraFoto = fotos.isNotEmpty ? fotos[0] : '';
 
                   return GestureDetector(
                     onTap: () {
@@ -149,8 +150,8 @@ class _AdocaoPageState extends State<AdocaoPage> {
                           ClipRRect(
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                             child: Image.network(
-                              foto.isNotEmpty
-                                  ? foto
+                              primeiraFoto.isNotEmpty
+                                  ? primeiraFoto
                                   : 'https://via.placeholder.com/300x200?text=Sem+Imagem',
                               height: 120,
                               width: double.infinity,
@@ -164,32 +165,35 @@ class _AdocaoPageState extends State<AdocaoPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Chip(
-                                  label: Text(tipo),
-                                  backgroundColor: Colors.green.shade100,
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  labelStyle: const TextStyle(fontSize: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Chip(
+                                    label: Text(
+                                      tipo,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    backgroundColor: Colors.green.shade100,
+                                    visualDensity: VisualDensity.compact,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   nome,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold, fontSize: 16),
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   descricao,
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.black54),
-                                  maxLines: 2,
+                                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                  maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 6),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: BotaoFavorito(petId: animal.id, detalhesPage: false),
+                                  softWrap: true,
                                 ),
                               ],
                             ),
@@ -198,6 +202,8 @@ class _AdocaoPageState extends State<AdocaoPage> {
                       ),
                     ),
                   );
+
+
                 },
               );
             },
