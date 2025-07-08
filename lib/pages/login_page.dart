@@ -69,8 +69,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isLogin ? 'Login' : 'Cadastro'),
-        backgroundColor: Colors.green,
+        title: Text(isLogin ? 'Login' : 'Cadastro', style: const TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFFFFA726),
         centerTitle: true,
       ),
       body: Padding(
@@ -109,16 +109,17 @@ class _LoginPageState extends State<LoginPage> {
                 : ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Color(0xFFFFA726),
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                     ),
-                    child: Text(isLogin ? 'Entrar' : 'Cadastrar'),
+                    child: Text(isLogin ? 'Entrar' : 'Cadastrar', style: const TextStyle(color: Colors.white)),
                   ),
             TextButton(
               onPressed: _isLoading ? null : _toggleMode,
               child: Text(isLogin
                   ? 'Não tem conta? Cadastre-se'
-                  : 'Já tem conta? Fazer login'),
+                  : 'Já tem conta? Fazer login',
+                  style: const TextStyle(color: Colors.black)),
             ),
             const SizedBox(height: 16),
             Text(

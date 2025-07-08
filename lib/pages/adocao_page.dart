@@ -99,9 +99,19 @@ class AdocaoPage extends StatelessWidget {
                                 foregroundColor: Colors.white,
                               ),
                             ),
-                            BotaoFavorito(petId: animal.id),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.contact_mail, color: Colors.green),
+                                  tooltip: 'Contato',
+                                  onPressed: () => _mostrarContato(context, animais[index]['userId']),
+                                ),
+                                BotaoFavorito(petId: animal.id),
+                              ],
+                            ),
                           ],
-                        )
+                        ),
+
                       ],
                     ),
                   ),
@@ -131,4 +141,61 @@ class AdocaoPage extends StatelessWidget {
 
     await docRef.update({'favoritadoPor': favoritos});
   }
+
+  void _mostrarContato(BuildContext context, String donoId) async {
+  try {
+    final doc = await FirebaseFirestore.instance.collection('usuarios').doc(donoId).get();
+
+    if (!doc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informações de contato não encontradas.')),
+      );
+      return;
+    }
+
+    final nome = doc['nome'] ?? 'Nome não disponível';
+    final email = doc['email'] ?? 'Email não disponível';
+    final telefone = doc['telefone'] ?? 'Telefone não disponível';
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Contato de $nome'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.email, color: Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(child: Text(email)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.phone, color: Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(child: Text(telefone)),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Fechar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao buscar contato: $e')),
+    );
+  }
+}
+
 }
