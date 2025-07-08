@@ -16,8 +16,8 @@ class MeusPetsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meus Pets'),
-        backgroundColor: Colors.green,
+        title: const Text('Meus Pets', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFFFFA726), // Cor laranja
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -44,7 +44,7 @@ class MeusPetsPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  leading: const Icon(Icons.pets, color: Colors.green),
+                  leading: const Icon(Icons.pets, color:Color(0xFFFFA726)),
                   title: Text(pet['nome'] ?? 'Sem nome'),
                   subtitle: Text('${pet['descricao'] ?? ''} • ${pet['tipo'] ?? ''}'),
                   trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
