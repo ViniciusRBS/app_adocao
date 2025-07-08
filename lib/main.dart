@@ -4,6 +4,7 @@ import 'theme_provider.dart';
 import 'app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app_teste1/pages/chat_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,6 @@ void main() async {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -34,7 +34,13 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData.dark(),
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: const MyApp1(),
+      routes: {
+        '/chat': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final conversaId = args['conversaId'] as String;
+          return ChatPage(conversaId: conversaId);
+        },
+      },
     );
   }
 }
-

@@ -33,7 +33,7 @@ class AuthController {
         'email': email,
         'telefone': telefone,               // novo campo telefone
         'criadoEm': FieldValue.serverTimestamp(),
-      });
+      }); 
 
       // Não faz login automático após o cadastro
       return null;
@@ -54,8 +54,8 @@ class AuthController {
     }
   }
 
-  static void logout() {
-    FirebaseAuth.instance.signOut();
+  static Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
     isLoggedIn.value = false;
     userName = null;
   }

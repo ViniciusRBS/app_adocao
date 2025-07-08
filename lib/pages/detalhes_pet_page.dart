@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:app_teste1/widgets/botao_favorito.dart';
 import 'editar_pet_page.dart';
+import 'chat_page.dart';
 
 class DetalhesPetPage extends StatelessWidget {
   final String petId;
@@ -28,7 +29,7 @@ class DetalhesPetPage extends StatelessWidget {
         final descricao = pet['descricao'] ?? 'Sem descrição';
         final tipo = pet['tipo'] ?? 'Desconhecido';
         final List<dynamic> fotos = pet['fotos'] ?? [];
-        final userId = pet['userId'];
+        final String? userId = pet['userId'];
         final criadoEm = (pet['criadoEm'] as Timestamp?)?.toDate();
 
         final currentUser = FirebaseAuth.instance.currentUser;
@@ -42,7 +43,11 @@ class DetalhesPetPage extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.contact_mail, color: Colors.white),
                 tooltip: 'Ver Contato',
-                onPressed: () => _mostrarContato(context, userId),
+                onPressed: () {
+                  if (userId != null) {
+                    _mostrarContato(context, userId);
+                  }
+                },
               ),
               if (isDono) ...[
                 IconButton(
@@ -98,13 +103,33 @@ class DetalhesPetPage extends StatelessWidget {
                   ),
                 const SizedBox(height: 12),
                 FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance.collection('usuarios').doc(userId).get(),
+                  future: userId != null
+                      ? FirebaseFirestore.instance.collection('usuarios').doc(userId).get()
+                      : null,
                   builder: (context, snapshotUser) {
                     if (snapshotUser.connectionState == ConnectionState.waiting) {
                       return const Text('Carregando dono...');
                     }
                     final nomeDono = snapshotUser.data?.get('nome') ?? 'Desconhecido';
-                    return Text('Dono: $nomeDono');
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Dono: $nomeDono'),
+                        const SizedBox(height: 16),
+                        if (!isDono && currentUser != null && userId != null)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.chat),
+                              label: const Text('Enviar mensagem'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFA726),
+                              ),
+                              onPressed: () => _iniciarConversa(context, currentUser.uid, userId),
+                            ),
+                          ),
+                      ],
+                    );
                   },
                 ),
               ],
@@ -113,6 +138,51 @@ class DetalhesPetPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _iniciarConversa(BuildContext context, String usuarioAtualId, String outroUsuarioId) async {
+    try {
+      final conversasRef = FirebaseFirestore.instance.collection('conversas');
+
+      final query = await conversasRef
+          .where('participantes', arrayContains: usuarioAtualId)
+          .get();
+
+      String? conversaIdExistente;
+
+      for (var doc in query.docs) {
+        final participantes = List<String>.from(doc['participantes'] ?? []);
+        if (participantes.contains(outroUsuarioId)) {
+          conversaIdExistente = doc.id;
+          break;
+        }
+      }
+
+      String conversaId;
+      if (conversaIdExistente != null) {
+        conversaId = conversaIdExistente;
+      } else {
+        final novaConversa = await conversasRef.add({
+          'participantes': [usuarioAtualId, outroUsuarioId],
+          'criadaEm': FieldValue.serverTimestamp(),
+        });
+        conversaId = novaConversa.id;
+      }
+
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatPage(conversaId: conversaId),
+          ),
+        );
+      }
+    } catch (e, stack) {
+      print('Erro ao iniciar conversa: $e\n$stack');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao iniciar conversa. Tente novamente.')),
+      );
+    }
   }
 
   void _mostrarContato(BuildContext context, String userId) async {
@@ -139,9 +209,9 @@ class DetalhesPetPage extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(children: [Icon(Icons.email), SizedBox(width: 8), Expanded(child: Text(email))]),
+              Row(children: [const Icon(Icons.email), const SizedBox(width: 8), Expanded(child: Text(email))]),
               const SizedBox(height: 12),
-              Row(children: [Icon(Icons.phone), SizedBox(width: 8), Expanded(child: Text(telefone))]),
+              Row(children: [const Icon(Icons.phone), const SizedBox(width: 8), Expanded(child: Text(telefone))]),
             ],
           ),
           actions: [
@@ -202,7 +272,6 @@ class _CarouselDeImagens extends StatefulWidget {
 
 class _CarouselDeImagensState extends State<_CarouselDeImagens> {
   final PageController _controller = PageController();
-  int _indiceAtual = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +282,6 @@ class _CarouselDeImagensState extends State<_CarouselDeImagens> {
           child: PageView.builder(
             controller: _controller,
             itemCount: widget.fotos.length,
-            onPageChanged: (index) => setState(() => _indiceAtual = index),
             itemBuilder: (context, index) {
               final url = widget.fotos[index];
               return GestureDetector(
