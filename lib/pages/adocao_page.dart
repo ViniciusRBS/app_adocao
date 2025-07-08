@@ -95,7 +95,7 @@ class AdocaoPage extends StatelessWidget {
                               icon: const Icon(Icons.info_outline),
                               label: const Text('Ver detalhes'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[400],
+                                backgroundColor: Color(0xFFFFA726),
                                 foregroundColor: Colors.white,
                               ),
                             ),

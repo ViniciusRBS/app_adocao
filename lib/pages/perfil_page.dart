@@ -44,7 +44,7 @@ class PerfilPage extends StatelessWidget {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF388E3C),
+                      backgroundColor: const Color(0xFFFFA726),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
                     ),
@@ -64,7 +64,7 @@ class PerfilPage extends StatelessWidget {
               const SizedBox(height: 32),
               const CircleAvatar(
                 radius: 48,
-                backgroundColor: Color(0xFFA5D6A7),
+                backgroundColor: Color(0xFFFFA726),
                 child: Icon(Icons.account_circle,
                     size: 80, color: Colors.white),
               ),
@@ -74,13 +74,13 @@ class PerfilPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF388E3C),
+                  color: Color(0xFFFFA726),
                 ),
               ),
               const SizedBox(height: 8),
               const SizedBox(height: 32),
               ListTile(
-                leading: const Icon(Icons.pets, color: Color(0xFF388E3C)),
+                leading: const Icon(Icons.pets, color: Color(0xFFFFA726)),
                 title: const Text('Meus Pets para Adoção'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
@@ -91,13 +91,13 @@ class PerfilPage extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.favorite, color: Color(0xFF388E3C)),
+                leading: const Icon(Icons.favorite, color: Color(0xFFFFA726)),
                 title: const Text('Favoritos'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {},
               ),
               ListTile(
-                leading: const Icon(Icons.settings, color: Color(0xFF388E3C)),
+                leading: const Icon(Icons.settings, color: Color(0xFFFFA726)),
                 title: const Text('Configurações'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {},

@@ -31,13 +31,26 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         leading: Icon(Icons.pets, color: Colors.white, size: 35),
-        title: const Text('Coração Animal'),
-        backgroundColor: Colors.green[400],
+        title: const Text('Coração Animal',style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFFFFA726),
+        actions: _selectedIndex == 0
+      ? [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CadastroPetPage()),
+              );
+            },
+          ),
+        ]
+      : [],
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.green[800],
+        selectedItemColor: Color(0xFFFFA726),
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [
@@ -55,19 +68,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: _selectedIndex == 0
-    ? FloatingActionButton(
-        backgroundColor: Colors.green[400],
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CadastroPetPage()),
-          );
-        },
-      )
-    : null,
-
     );
   }
 }

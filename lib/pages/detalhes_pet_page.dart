@@ -31,8 +31,8 @@ class DetalhesPetPage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(nome),
-            backgroundColor: Colors.green,
+            title: Text(nome, style: const TextStyle(color: Colors.white)),
+            backgroundColor: Color(0xFFFFA726),
             actions: [
               BotaoFavorito(petId: petId),
             ],

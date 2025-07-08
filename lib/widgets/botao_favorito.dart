@@ -21,15 +21,21 @@ class _BotaoFavoritoState extends State<BotaoFavorito> {
     _verificarFavorito();
   }
 
-  Future<void> _verificarFavorito() async {
-    if (user == null) return;
-    final doc = await FirebaseFirestore.instance.collection('pets').doc(widget.petId).get();
-    final List favoritos = doc['favoritadoPor'] ?? [];
+Future<void> _verificarFavorito() async {
+  if (user == null) return;
 
-    setState(() {
-      _favoritado = favoritos.contains(user!.uid);
-    });
-  }
+  final doc = await FirebaseFirestore.instance.collection('pets').doc(widget.petId).get();
+  final data = doc.data();
+
+  if (data == null) return; // documento não encontrado
+
+  final List favoritos = data.containsKey('favoritadoPor') ? data['favoritadoPor'] : [];
+
+  setState(() {
+    _favoritado = favoritos.contains(user!.uid);
+  });
+}
+
 
   Future<void> _alternarFavorito() async {
     if (user == null) return;

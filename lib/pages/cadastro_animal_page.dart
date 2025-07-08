@@ -96,8 +96,8 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cadastrar Novo Pet'),
-        backgroundColor: Colors.green[400],
+        title: const Text('Cadastrar Novo Pet',style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFFFFA726), // Cor personalizada
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -174,14 +174,14 @@ class _CadastroPetPageState extends State<CadastroPetPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _salvarPet,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[400],
+                    backgroundColor: Color(0xFFFFA726), // Cor personalizada
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Salvar Pet',
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(fontSize: 18,color: Colors.white),
                         ),
                 ),
               )
