@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:app_teste1/widgets/botao_favorito.dart';
+import 'editar_pet_page.dart';
 
 class DetalhesPetPage extends StatelessWidget {
   final String petId;
@@ -21,7 +23,6 @@ class DetalhesPetPage extends StatelessWidget {
         }
 
         final pet = snapshot.data!.data() as Map<String, dynamic>;
-
         final nome = pet['nome'] ?? 'Sem nome';
         final descricao = pet['descricao'] ?? 'Sem descrição';
         final tipo = pet['tipo'] ?? 'Desconhecido';
@@ -29,12 +30,39 @@ class DetalhesPetPage extends StatelessWidget {
         final userId = pet['userId'];
         final criadoEm = (pet['criadoEm'] as Timestamp?)?.toDate();
 
+        final currentUser = FirebaseAuth.instance.currentUser;
+        final isDono = currentUser != null && currentUser.uid == userId;
+
         return Scaffold(
           appBar: AppBar(
             title: Text(nome, style: const TextStyle(color: Colors.white)),
-            backgroundColor: Color(0xFFFFA726),
+            backgroundColor: const Color(0xFFFFA726),
             actions: [
-              BotaoFavorito(petId: petId),
+              IconButton(
+                icon: const Icon(Icons.contact_mail, color: Colors.white),
+                tooltip: 'Ver Contato',
+                onPressed: () => _mostrarContato(context, userId),
+              ),
+              if (isDono) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.white),
+                  tooltip: 'Editar Pet',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditarPetPage(petId: petId),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.white),
+                  tooltip: 'Excluir Pet',
+                  onPressed: () => _confirmarExclusao(context, petId, nome),
+                ),
+              ],
+              BotaoFavorito(petId: petId, detalhesPage: true),
             ],
           ),
           body: SingleChildScrollView(
@@ -54,8 +82,8 @@ class DetalhesPetPage extends StatelessWidget {
                   ),
                 const SizedBox(height: 16),
                 Chip(
-                  label: Text(tipo),
-                  backgroundColor: Colors.green.shade100,
+                  label: Text(tipo, style: const TextStyle(color: Colors.white)),
+                  backgroundColor: const Color(0xFFFFA726),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -84,6 +112,91 @@ class DetalhesPetPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _mostrarContato(BuildContext context, String userId) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('usuarios').doc(userId).get();
+
+      if (!doc.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Informações de contato não encontradas.')),
+        );
+        return;
+      }
+
+      final nome = doc['nome'] ?? 'Nome não disponível';
+      final email = doc['email'] ?? 'Email não disponível';
+      final telefone = doc['telefone'] ?? 'Telefone não disponível';
+
+      if (!context.mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Contato de $nome'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.email, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(email)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(Icons.phone, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(telefone)),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Fechar'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao buscar contato: $e')),
+      );
+    }
+  }
+
+  void _confirmarExclusao(BuildContext context, String petId, String nome) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar exclusão'),
+        content: Text('Tem certeza que deseja excluir o pet "$nome"? Essa ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          TextButton(
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await FirebaseFirestore.instance.collection('pets').doc(petId).delete();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Pet "$nome" excluído com sucesso.')),
+                );
+                Navigator.of(context).pop(); // volta para a tela anterior depois da exclusão
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
