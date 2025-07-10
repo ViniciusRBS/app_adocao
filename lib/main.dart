@@ -5,13 +5,15 @@ import 'app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_teste1/pages/chat_page.dart';
+import 'controllers/auth_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  print("SharedPrefs funcionando: ${prefs.getKeys()}");
+
+  await AuthController.initialize(); // Mantém usuário logado se já autenticado
 
   runApp(
     ChangeNotifierProvider(
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
         '/chat': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           final conversaId = args['conversaId'] as String;
-          return ChatPage(conversaId: conversaId);
+          return ChatPage(conversaId: conversaId, userId: '',);
         },
       },
     );

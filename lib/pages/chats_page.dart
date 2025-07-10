@@ -10,11 +10,9 @@ class ChatsPage extends StatelessWidget {
   Future<List<String>> _buscarNomesParticipantes(List<String> ids) async {
     final usuariosCollection = FirebaseFirestore.instance.collection('usuarios');
 
-    // Busca documentos de usuários para cada id
     final futurosDocs = ids.map((id) => usuariosCollection.doc(id).get());
     final snapshots = await Future.wait(futurosDocs);
 
-    // Extrai os nomes ou usa o id como fallback
     final nomes = snapshots.map((doc) {
       if (doc.exists && doc.data() != null && doc.data()!.containsKey('nome')) {
         return doc['nome'] as String;
@@ -56,7 +54,6 @@ class ChatsPage extends StatelessWidget {
             final List<dynamic> participantes = doc['participantes'];
             final outrosIds = participantes.where((id) => id != userId).cast<String>().toList();
 
-            // Usamos FutureBuilder para exibir os nomes
             return FutureBuilder<List<String>>(
               future: _buscarNomesParticipantes(outrosIds),
               builder: (context, nomesSnapshot) {
@@ -67,8 +64,8 @@ class ChatsPage extends StatelessWidget {
                   );
                 }
                 if (nomesSnapshot.hasError) {
-                  return ListTile(
-                    title: const Text('Erro ao carregar nomes'),
+                  return const ListTile(
+                    title: Text('Erro ao carregar nomes'),
                   );
                 }
 

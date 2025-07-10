@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatPage extends StatefulWidget {
   final String conversaId;
+  final String userId;
 
-  const ChatPage({Key? key, required this.conversaId}) : super(key: key);
+  const ChatPage({Key? key, required this.conversaId, required this.userId}) : super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -13,11 +14,37 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _mensagemController = TextEditingController();
-  final user = FirebaseAuth.instance.currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _marcarMensagensLidas();
+  }
+
+void _marcarMensagensLidas() async {
+  final mensagensRef = FirebaseFirestore.instance
+      .collection('conversas')
+      .doc(widget.conversaId)
+      .collection('mensagens');
+
+  final allMessagesSnapshot = await mensagensRef.get();
+
+  for (var msg in allMessagesSnapshot.docs) {
+    final data = msg.data();
+    final lidas = List<String>.from(data['lidas'] ?? []);
+    final remetente = data['remetenteId'];
+    if (!lidas.contains(widget.userId) && remetente != widget.userId) {
+      await msg.reference.update({
+        'lidas': FieldValue.arrayUnion([widget.userId])
+      });
+    }
+  }
+}
+
 
   void _enviarMensagem() async {
     final texto = _mensagemController.text.trim();
-    if (texto.isEmpty || user == null) return;
+    if (texto.isEmpty) return;
 
     await FirebaseFirestore.instance
         .collection('conversas')
@@ -25,8 +52,9 @@ class _ChatPageState extends State<ChatPage> {
         .collection('mensagens')
         .add({
       'texto': texto,
-      'remetenteId': user!.uid,
+      'remetenteId': widget.userId,
       'timestamp': FieldValue.serverTimestamp(),
+      'lidas': [widget.userId], // Já marca como lida para quem enviou
     });
 
     _mensagemController.clear();
@@ -34,11 +62,9 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (user == null) return const Center(child: Text('Usuário não autenticado.'));
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conversa', style: TextStyle(color: Colors.white)),
+        title: const Text(''),
         backgroundColor: const Color(0xFFFFA726),
       ),
       body: SafeArea(
@@ -70,7 +96,7 @@ class _ChatPageState extends State<ChatPage> {
                     itemBuilder: (context, index) {
                       final msg = mensagens[index];
                       final texto = msg['texto'];
-                      final isMinha = msg['remetenteId'] == user!.uid;
+                      final isMinha = msg['remetenteId'] == widget.userId;
 
                       return Align(
                         alignment: isMinha ? Alignment.centerRight : Alignment.centerLeft,

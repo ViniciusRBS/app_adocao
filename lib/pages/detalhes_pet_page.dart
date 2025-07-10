@@ -173,7 +173,7 @@ class DetalhesPetPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ChatPage(conversaId: conversaId),
+            builder: (_) => ChatPage(conversaId: conversaId, userId: '',),
           ),
         );
       }

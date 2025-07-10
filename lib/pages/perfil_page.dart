@@ -1,3 +1,4 @@
+import 'package:app_teste1/pages/onboarding_page.dart';
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import 'login_page.dart';
@@ -176,7 +177,7 @@ class PerfilPage extends StatelessWidget {
                 onPressed: () {
                   AuthController.logout();
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                    MaterialPageRoute(builder: (_) => const OnboardingPage()),
                   );
                 },
                 icon: const Icon(Icons.logout, color: Colors.red),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'adocao_page.dart';
 import 'favoritos_page.dart';
 import 'perfil_page.dart';
@@ -6,20 +8,32 @@ import 'chats_page.dart';
 import 'chat_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int paginaInicial;
+
+  const HomePage({super.key, this.paginaInicial = 0});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   String? _chatSelecionadoId;
+  String? _userId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.paginaInicial;
+
+    final user = FirebaseAuth.instance.currentUser;
+    _userId = user?.uid;
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      _chatSelecionadoId = null; // Reseta ao sair do chat
+      _chatSelecionadoId = null; // Sai do chat individual
     });
   }
 
@@ -35,9 +49,15 @@ class _HomePageState extends State<HomePage> {
     Widget body;
 
     if (_selectedIndex == 3) {
-      body = _chatSelecionadoId == null
-          ? ChatsPage(abrirChat: _abrirChat)
-          : ChatPage(conversaId: _chatSelecionadoId!);
+      if (_chatSelecionadoId == null) {
+        body = ChatsPage(abrirChat: _abrirChat);
+      } else {
+        if (_userId != null) {
+          body = ChatPage(conversaId: _chatSelecionadoId!, userId: _userId!);
+        } else {
+          body = const Center(child: Text('Usuário não autenticado.'));
+        }
+      }
     } else {
       final List<Widget> pages = const [
         AdocaoPage(),
